@@ -59,7 +59,7 @@ static LRESULT CALLBACK xc__process_window_message(HWND hwnd, UINT message, WPAR
             }
             break;
     }
-    return DefWindowProcA(hwnd, message, wparam, lparam);
+    return DefWindowProc(hwnd, message, wparam, lparam);
 }
 
 static double xc_get_time(void) {
@@ -108,10 +108,10 @@ static int32_t xgl_run(const xgl_RunInput* in) {
     assert(in);
     SetProcessDPIAware();
 
-    RegisterClassA(&(WNDCLASSA){
+    RegisterClass(&(WNDCLASSA){
         .lpfnWndProc = xc__process_window_message,
-        .hInstance = GetModuleHandleA(NULL),
-        .hCursor = LoadCursorA(NULL, IDC_ARROW),
+        .hInstance = GetModuleHandle(NULL),
+        .hCursor = LoadCursor(NULL, IDC_ARROW),
         .lpszClassName = in->name,
     });
 
@@ -120,7 +120,7 @@ static int32_t xgl_run(const xgl_RunInput* in) {
     RECT rect = { .left = 0, .top = 0, .right = in->viewport_width, .bottom = in->viewport_height };
     AdjustWindowRect(&rect, style, FALSE);
 
-    HWND hwnd = CreateWindowExA(0, in->name, in->name, style + WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, rect.right - rect.left, rect.bottom - rect.top, NULL, NULL, NULL, NULL);
+    HWND hwnd = CreateWindowEx(0, in->name, in->name, style + WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, rect.right - rect.left, rect.bottom - rect.top, NULL, NULL, NULL, NULL);
 
     HDC hdc = GetDC(hwnd);
 
@@ -184,7 +184,7 @@ static int32_t xgl_run(const xgl_RunInput* in) {
         }
 
         if (has_path_rendering == false || has_mesh_shader == false) {
-            MessageBoxA(hwnd, "Sorry but this application requires modern NVIDIA GPU with latest graphics drivers.", "Unsupported GPU", MB_OK | MB_ICONSTOP);
+            MessageBox(hwnd, "Sorry but this application requires modern NVIDIA GPU with latest graphics drivers.", "Unsupported GPU", MB_OK | MB_ICONSTOP);
             ExitProcess(0);
         }
     }
@@ -215,9 +215,9 @@ static int32_t xgl_run(const xgl_RunInput* in) {
 
     for (;;) {
         MSG msg = {0};
-        if (PeekMessageA(&msg, NULL, 0, 0, PM_REMOVE)) {
+        if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
             TranslateMessage(&msg);
-            DispatchMessageA(&msg);
+            DispatchMessage(&msg);
             if (msg.message == WM_QUIT) break;
         } else {
             float dt = xc__update_frame_stats(hwnd, in->name);
@@ -231,7 +231,7 @@ static int32_t xgl_run(const xgl_RunInput* in) {
             SwapBuffers(hdc);
 
             if (glGetError() != GL_NO_ERROR) {
-                MessageBoxA(hwnd, "OpenGL error detected.", "Error", MB_OK | MB_ICONERROR);
+                MessageBox(hwnd, "OpenGL error detected.", "Error", MB_OK | MB_ICONERROR);
                 if (retcode == 0) retcode = 1;
             }
 
